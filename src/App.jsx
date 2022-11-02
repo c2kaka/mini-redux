@@ -17,7 +17,7 @@ function App() {
 }
 
 const First = () => <section>First<User/></section>
-const Second = () => <section>Second<UserModifier/></section>
+const Second = () => <section>Second<Wrapper/></section>
 const Third = () => <section>Third</section>
 
 /**
@@ -46,13 +46,21 @@ const User = () => {
   return <div>User:{contextValue.appState.user.name}</div>
 }
 
-const UserModifier = () => {
+const Wrapper = () => {
   const { appState, setAppState } = useContext(appContext);
-  const onChange = (e) => {
-    setAppState(reducer(appState, {type: 'updateUser', payload: {name: e.target.value}}))
+  const dispatch = (action) => {
+    setAppState(reducer(appState, action));
   }
 
-  return <input type="text" value={appState.user.name} onChange={onChange}/>
+  return <UserModifier dispatch={dispatch} state={appState}/>
+}
+
+const UserModifier = ({ dispatch, state }) => {
+  const onChange = (e) => {
+    dispatch({type: 'updateUser', payload: {name: e.target.value}})
+  }
+
+  return <input type="text" value={state.user.name} onChange={onChange}/>
 }
 
 export default App
