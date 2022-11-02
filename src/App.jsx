@@ -1,34 +1,38 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import React, { useState, useContext } from 'react'
 
+const appContext = React.createContext(null)
 function App() {
-  const [count, setCount] = useState(0)
+  const [appState, setAppState] = useState({
+    user: { name: 'kaka', age: 22 }
+  })
+  const contextValue = {appState, setAppState};
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
+    <appContext.Provider value={contextValue}>
+      <First/>
+      <Second/>
+      <Third/>
+    </appContext.Provider>
   )
+}
+
+const First = () => <section>First<User/></section>
+const Second = () => <section>Second<UserModifier/></section>
+const Third = () => <section>Third</section>
+
+const User = () => {
+  const contextValue = useContext(appContext);
+  return <div>User:{contextValue.appState.user.name}</div>
+}
+
+const UserModifier = () => {
+  const { appState, setAppState } = useContext(appContext);
+  const onChange = (e) => {
+    appState.user.name = e.target.value;
+    setAppState({...appState})
+  }
+
+  return <input type="text" value={appState.user.name} onChange={onChange}/>
 }
 
 export default App
