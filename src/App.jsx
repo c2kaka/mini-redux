@@ -1,14 +1,9 @@
-import React, { useState, useContext } from 'react'
+import React from 'react'
+import {store, connect, appContext} from "./redux.jsx";
 
-const appContext = React.createContext(null)
 function App() {
-  const [appState, setAppState] = useState({
-    user: { name: 'kaka', age: 22 }
-  })
-  const contextValue = {appState, setAppState};
-
   return (
-    <appContext.Provider value={contextValue}>
+    <appContext.Provider value={store}>
       <First/>
       <Second/>
       <Third/>
@@ -16,48 +11,26 @@ function App() {
   )
 }
 
-const First = () => <section>First<User/></section>
-const Second = () => <section>Second<UserModifier>--content--</UserModifier></section>
-const Third = () => <section>Third</section>
-
-/**
- * reducer: 用来规范state的创建流程
- * @param state
- * @param type
- * @param payload
- * @returns {*&{user: (*)}}
- */
-const reducer = (state, { type, payload }) => {
-  if (type === 'updateUser') {
-    return {
-      ...state,
-      user: {
-        ...state.user,
-        ...payload
-      }
-    };
-  } else {
-    return state;
-  }
+const First = () => {
+  console.log('First rendered' + new Date().toString())
+  return <section>First<User/></section>
+}
+const Second = () => {
+  console.log('Second rendered' + new Date().toString())
+  return <section>Second<UserModifier>--content--</UserModifier></section>
+}
+const Third = () => {
+  console.log('Third rendered' + new Date().toString())
+  return <section>Third</section>
 }
 
-const User = () => {
-  const contextValue = useContext(appContext);
-  return <div>User:{contextValue.appState.user.name}</div>
-}
-
-const connect = (Component) => {
-  return (props) => {
-    const { appState, setAppState } = useContext(appContext);
-    const dispatch = (action) => {
-      setAppState(reducer(appState, action));
-    }
-
-    return <Component {...props} dispatch={dispatch} state={appState}/>
-  }
-};
+const User = connect(({state}) => {
+  console.log('User rendered' + new Date().toString())
+  return <div>User:{state.user.name}</div>
+})
 
 const UserModifier = connect(({ dispatch, state, children }) => {
+  console.log('UserModifier rendered' + new Date().toString())
   const onChange = (e) => {
     dispatch({type: 'updateUser', payload: {name: e.target.value}})
   }
