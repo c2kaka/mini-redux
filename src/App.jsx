@@ -24,12 +24,14 @@ const Third = () => {
   return <section>Third</section>
 }
 
-const User = connect(({state}) => {
+const User = connect((state) => {
+  return { user: state.user };
+})(({user}) => {
   console.log('User rendered' + new Date().toString())
-  return <div>User:{state.user.name}</div>
+  return <div>User:{user.name}</div>
 })
 
-const UserModifier = connect(({ dispatch, state, children }) => {
+const UserModifier = connect()(({ dispatch, state, children }) => {
   console.log('UserModifier rendered' + new Date().toString())
   const onChange = (e) => {
     dispatch({type: 'updateUser', payload: {name: e.target.value}})

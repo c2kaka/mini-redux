@@ -39,9 +39,10 @@ export const reducer = (state, { type, payload }) => {
     }
 }
 
-export const connect = (Component) => {
+export const connect = (selector) => (Component) => {
     return (props) => {
         const { state, setState } = useContext(appContext);
+        const data = selector ? selector(state) : {state};
         const [, update] = useState({});
         useEffect(() => {
             store.subscribe(() => update({}))
@@ -50,7 +51,7 @@ export const connect = (Component) => {
             setState(reducer(state, action));
         }
 
-        return <Component {...props} dispatch={dispatch} state={state}/>
+        return <Component {...props} {...data} dispatch={dispatch}/>
     }
 };
 
