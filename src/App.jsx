@@ -19,10 +19,12 @@ const Second = () => {
   console.log('Second rendered' + new Date().toString())
   return <section>Second<UserModifier>--content--</UserModifier></section>
 }
-const Third = () => {
+const Third = connect((state) => {
+  return { group: state.group }
+})(({group}) => {
   console.log('Third rendered' + new Date().toString())
-  return <section>Third</section>
-}
+  return <section>Third:{group.groupName}</section>
+})
 
 const User = connect((state) => {
   return { user: state.user };
