@@ -1,5 +1,6 @@
 import React from 'react'
 import {store, connect, appContext} from "./redux.jsx";
+import {connectUser} from "./connectors/userConnector.js";
 
 function App() {
   return (
@@ -26,16 +27,12 @@ const Third = connect((state) => {
   return <section>Third:{group.groupName}</section>
 })
 
-const User = connect((state) => {
-  return { user: state.user };
-})(({user}) => {
+const User = connectUser(({user}) => {
   console.log('User rendered' + new Date().toString())
   return <div>User:{user.name}</div>
 })
 
-const UserModifier = connect(null, (dispatch) => {
-  return { updateUser: (payload) => dispatch({type: 'updateUser', payload}) }
-})(({ updateUser, state, children }) => {
+const UserModifier = connectUser(({ updateUser, user, children }) => {
   console.log('UserModifier rendered' + new Date().toString())
   const onChange = (e) => {
     updateUser({name: e.target.value})
@@ -43,7 +40,7 @@ const UserModifier = connect(null, (dispatch) => {
 
   return <div>
     <p>{children}</p>
-    <input type="text" value={state.user.name} onChange={onChange}/>
+    <input type="text" value={user.name} onChange={onChange}/>
   </div>
 })
 
