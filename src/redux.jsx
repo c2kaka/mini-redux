@@ -1,10 +1,8 @@
 import React, {useContext, useEffect, useState} from "react";
 
-export const store = {
-    state: {
-        user: { name: 'kaka', age: 22 },
-        group: { groupName: 'frontend' }
-    },
+const store = {
+    state: undefined,
+    reducer: undefined,
     setState(newState) {
         store.state = newState;
         store.listeners.forEach((fn) => fn(newState))
@@ -19,26 +17,11 @@ export const store = {
     }
 };
 
-/**
- * reducer: 用来规范state的创建流程
- * @param state
- * @param type
- * @param payload
- * @returns {*&{user: (*)}}
- */
-export const reducer = (state, { type, payload }) => {
-    if (type === 'updateUser') {
-        return {
-            ...state,
-            user: {
-                ...state.user,
-                ...payload
-            }
-        };
-    } else {
-        return state;
-    }
-}
+export const createStore = (reducer, initState) => {
+    store.reducer = reducer;
+    store.state = initState;
+    return store;
+};
 
 const isChanged = (state, newState) => {
     if (state === newState) {
@@ -58,7 +41,7 @@ const isChanged = (state, newState) => {
 export const connect = (selector, mapDispatchToProps) => (Component) => {
     return (props) => {
         const dispatch = (action) => {
-            setState(reducer(state, action));
+            setState(store.reducer(state, action));
         };
         const { state, setState } = useContext(appContext);
         const dispatcher = mapDispatchToProps ? mapDispatchToProps(dispatch) : {dispatch};
@@ -77,4 +60,12 @@ export const connect = (selector, mapDispatchToProps) => (Component) => {
     }
 };
 
-export const appContext = React.createContext(null);
+const appContext = React.createContext(null);
+
+export const Provider = ({store, children}) => {
+    return (
+        <appContext.Provider value={store}>
+            {children}
+        </appContext.Provider>
+    )
+};

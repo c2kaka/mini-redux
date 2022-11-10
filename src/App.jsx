@@ -1,14 +1,35 @@
 import React from 'react'
-import {store, connect, appContext} from "./redux.jsx";
+import {createStore, connect, Provider} from "./redux.jsx";
 import {connectUser} from "./connectors/userConnector.js";
+
+const initState = {
+  user: { name: 'kaka', age: 22 },
+  group: { groupName: 'frontend' }
+};
+
+const reducer = (state, { type, payload }) => {
+  if (type === 'updateUser') {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        ...payload
+      }
+    };
+  } else {
+    return state;
+  }
+};
+
+const store = createStore(reducer, initState);
 
 function App() {
   return (
-    <appContext.Provider value={store}>
+    <Provider store={store}>
       <First/>
       <Second/>
       <Third/>
-    </appContext.Provider>
+    </Provider>
   )
 }
 
