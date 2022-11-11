@@ -26,12 +26,23 @@ const store = {
 };
 
 let dispatch = store.dispatch;
-let prevDispatch = dispatch;
+const funcDispatch = dispatch;
 dispatch = (action) => {
     if (typeof action === 'function') {
         action(dispatch);
     } else {
-        prevDispatch(action);
+        funcDispatch(action);
+    }
+}
+
+const prevDispatch = dispatch;
+dispatch = (action) => {
+    if (action.payload instanceof Promise) {
+        action.then(data => {
+            dispatch({...action, payload: data});
+        })
+    } else {
+        prevDispatch(action)
     }
 }
 
