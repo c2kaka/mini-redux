@@ -1,25 +1,43 @@
 import React, {useContext, useEffect, useState} from "react";
 
+let state = undefined;
+let reducer = undefined;
+let listeners = [];
+
+const setState = (newState) => {
+    state = newState;
+    listeners.forEach((fn) => fn(newState))
+};
+
 const store = {
-    state: undefined,
-    reducer: undefined,
-    setState(newState) {
-        store.state = newState;
-        store.listeners.forEach((fn) => fn(newState))
+    getState() {
+        return state;
     },
-    listeners: [],
+    dispatch(action) {
+        setState(reducer(state, action));
+    },
     subscribe(fn) {
-        store.listeners.push(fn);
+        listeners.push(fn);
         return () => {
-            const index = store.listeners.findIndex(fn);
-            store.listeners.splice(index, 1);
+            const index = listeners.findIndex(fn);
+            listeners.splice(index, 1);
         };
     }
 };
 
-export const createStore = (reducer, initState) => {
-    store.reducer = reducer;
-    store.state = initState;
+let dispatch = store.dispatch;
+let prevDispatch = dispatch;
+dispatch = (action) => {
+    if (typeof action === 'function') {
+        action(dispatch);
+    } else {
+        prevDispatch(action);
+    }
+}
+
+export const createStore = (_reducer, initState) => {
+    reducer = _reducer;
+    state = initState;
     return store;
 };
 
@@ -40,16 +58,12 @@ const isChanged = (state, newState) => {
 
 export const connect = (selector, mapDispatchToProps) => (Component) => {
     return (props) => {
-        const dispatch = (action) => {
-            setState(store.reducer(state, action));
-        };
-        const { state, setState } = useContext(appContext);
         const dispatcher = mapDispatchToProps ? mapDispatchToProps(dispatch) : {dispatch};
         const data = selector ? selector(state) : {state};
         const [, update] = useState({});
         useEffect(() => {
             return store.subscribe(() => {
-                const newState = selector ? selector(store.state) : { state: store.state };
+                const newState = selector ? selector(state) : {state: state};
                 if (isChanged(data, newState)) {
                     update({})
                 }
